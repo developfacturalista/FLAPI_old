@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
 @Path("/Opera")
 public class Opera {
 	@GET
-	@Path("/authors")
+	@Path("/authorsNuevo")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List getTrackInJSON() {
 		List listPerson = new ArrayList();
