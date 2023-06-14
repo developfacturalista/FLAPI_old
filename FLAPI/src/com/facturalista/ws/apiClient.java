@@ -30,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/apiclient")
-public class apiServices {
+public class apiClient {
 	@GET
 	@Path("/authorsNuevo")
 	@Produces(MediaType.APPLICATION_JSON)
