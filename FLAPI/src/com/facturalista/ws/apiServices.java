@@ -38,7 +38,7 @@ public class apiServices {
 		List listPerson = new ArrayList();
 		Person p1 = new Person();
 		p1.setId(1);
-		p1.setName("Santiago");
+		p1.setName("Santiago ");
 		Person p2 = new Person();
 		p2.setId(2);
 		p2.setName("Rodrigo");
