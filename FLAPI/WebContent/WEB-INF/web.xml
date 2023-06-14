@@ -12,7 +12,7 @@
         <welcome-file>default.jsp</welcome-file>
     </welcome-file-list>
     <servlet>
-     <servlet-name>FLAPI</servlet-name>
+     <servlet-name>FacturaListaWSOpera</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
@@ -25,7 +25,7 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>FLAPI</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>FacturaListaWSOpera</servlet-name>
+        <url-pattern>/WSOpera/*</url-pattern>
     </servlet-mapping>
 </web-app>
