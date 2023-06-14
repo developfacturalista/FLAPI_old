@@ -29,8 +29,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/Opera")
-public class Opera {
+@Path("/apiclient")
+public class apiServices {
 	@GET
 	@Path("/authorsNuevo")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -47,49 +47,10 @@ public class Opera {
 		return listPerson;
 	}
 
-	/*
-	 * @GET
-	 * 
-	 * @Path("/setFacturasNuevas/{z},{a},{b},{c},{d},{e}")
-	 * 
-	 * @Produces({MediaType.APPLICATION_JSON}) public String
-	 * saludoJsonPP(@PathParam("z") String idHotel,@PathParam("a") Boolean
-	 * bandera,@PathParam("b") String fecha,@PathParam("c") String
-	 * puestoRecepcion, @PathParam("d") String operacion,@PathParam("e") String
-	 * nroInterno) throws Exception {
-	 * 
-	 * String respuesta=insertarBD(idHotel, bandera, fecha, puestoRecepcion,
-	 * operacion, nroInterno);
-	 * 
-	 * 
-	 * return
-	 * "ID Hotel: "+idHotel+"\n"+"Bandera: "+bandera+"\n"+"Puesto de recepcion: "
-	 * +puestoRecepcion+"\n"+"Fecha: "+fecha+"\n"+"Operacion: "+operacion+
-	 * "\n"+"Nro interno venice: "+nroInterno+"\n"+"Respuesta web service: "
-	 * +respuesta; //Boolean b = Boolean.valueOf(bandera); //actualizarBD(b);
-	 * 
-	 * //return idHotel+", "+ b +
-	 * ", "+puestoRecepcion+", "+fecha+", "+operacion+", "+nroInterno;
-	 * 
-	 * }
-	 */
-
-	/*
-	 * @POST
-	 * 
-	 * @Path("/GetHrMsg/json_data")
-	 * 
-	 * @Consumes(MediaType.APPLICATION_JSON)
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON) public void gethrmessage(RequestBody
-	 * requestBody) { System.out.println(requestBody.hello);
-	 * System.out.println(requestBody.foo); System.out.println(requestBody.count); }
-	 */
-
 	@POST
-	@Path("/setFacturasNuevas")
+	@Path("/opera/newInvoice")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response gethrmessage(InputStream incomingData) {
+	public Response operaNewInvoice(InputStream incomingData) {
 		String respuesta = "";
 		String jsonstring = "";
 		int result = 0;
@@ -141,6 +102,281 @@ public class Opera {
 
 		// return HTTP response 200 in case of success
 		return Response.status(codigoRespuesta).entity(respuesta).build();
+	}
+	
+	@POST
+	@Path("/opera/getLastInvoice")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response operaGetLastInvoice(InputStream incomingData) {
+		String respuesta = "";
+		String jsonstring = "";
+		int result = 0;
+		int codigoRespuesta=0;
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+
+			System.out.println("Data Received: " + crunchifyBuilder.toString());
+			// try {
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(crunchifyBuilder.toString());
+			jsonstring = crunchifyBuilder.toString();
+
+			JSONObject docinfo = (JSONObject) json.get("DocumentInfo");
+			String idReserva = docinfo.get("FiscalFolioId").toString();
+			String idhotel = "";
+
+			if (docinfo.get("HotelCode").toString() != null) {
+				idhotel = docinfo.get("HotelCode").toString();
+			} else {
+				idhotel = "S/N";
+			}
+
+			result = insertarBDOpera(jsonstring);
+
+			updateIdReserva(result, idReserva, idhotel);
+
+			InterfazFL_Opera i = new InterfazFL_Opera();
+			String[] arguments = new String[] { idReserva };
+			respuesta = InterfazFL_Opera.main(arguments);
+			if(respuesta.contains("Error")) {
+				codigoRespuesta=402;
+			}
+			else {
+				codigoRespuesta=200;
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			respuesta = e.getMessage();
+			e.printStackTrace();
+			return Response.status(402).entity("Catch "+e.getMessage()).build();
+		}
+
+		// return HTTP response 200 in case of success
+		return Response.status(codigoRespuesta).entity(respuesta).build();
+	}
+	
+	@GET
+	@Path("/opera/rePrintInvoice")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response operaRePrintInvoice(InputStream incomingData) {
+		String respuesta = "";
+		String jsonstring = "";
+		int result = 0;
+		int codigoRespuesta=0;
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+
+			System.out.println("Data Received: " + crunchifyBuilder.toString());
+			// try {
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(crunchifyBuilder.toString());
+			jsonstring = crunchifyBuilder.toString();
+			
+			codigoRespuesta=200;
+			
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			respuesta = e.getMessage();
+			e.printStackTrace();
+			return Response.status(402).entity("Catch "+e.getMessage()).build();
+		}
+
+		// return HTTP response 200 in case of success
+		return Response.status(codigoRespuesta).entity(jsonstring).build();
+	}
+	
+	@GET
+	@Path("/opera/getInvoiceForId")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response operaGetInvoiceForId(InputStream incomingData) {
+		String respuesta = "";
+		String jsonstring = "";
+		int result = 0;
+		int codigoRespuesta=0;
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+
+			System.out.println("Data Received: " + crunchifyBuilder.toString());
+			// try {
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(crunchifyBuilder.toString());
+			jsonstring = crunchifyBuilder.toString();
+			
+			codigoRespuesta=200;
+			
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			respuesta = e.getMessage();
+			e.printStackTrace();
+			return Response.status(402).entity("Catch "+e.getMessage()).build();
+		}
+
+		// return HTTP response 200 in case of success
+		return Response.status(codigoRespuesta).entity(jsonstring).build();
+	}
+	
+	@POST
+	@Path("/generic/newInvoice")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response genericNewInvoice(InputStream incomingData) {
+		String respuesta = "";
+		String jsonstring = "";
+		int result = 0;
+		int codigoRespuesta=0;
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+
+			System.out.println("Data Received: " + crunchifyBuilder.toString());
+			// try {
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(crunchifyBuilder.toString());
+			jsonstring = crunchifyBuilder.toString();
+			
+			codigoRespuesta=200;
+			
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			respuesta = e.getMessage();
+			e.printStackTrace();
+			return Response.status(402).entity("Catch "+e.getMessage()).build();
+		}
+
+		// return HTTP response 200 in case of success
+		return Response.status(codigoRespuesta).entity(jsonstring).build();
+	}
+	
+	@GET
+	@Path("/generic/getLastInvoice")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response genericGetLastInvoice(InputStream incomingData) {
+		/*String respuesta = "";
+		String jsonstring = "";
+		int result = 0;
+		int codigoRespuesta=0;
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+
+			System.out.println("Data Received: " + crunchifyBuilder.toString());
+			// try {
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(crunchifyBuilder.toString());
+			jsonstring = crunchifyBuilder.toString();
+			
+			codigoRespuesta=200;
+			
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			respuesta = e.getMessage();
+			e.printStackTrace();
+			return Response.status(402).entity("Catch "+e.getMessage()).build();
+		}*/
+		
+		String jsonstring = "{\"responseText\":\"ultimafactura\"}";
+
+		// return HTTP response 200 in case of success
+		return Response.status(200).entity(jsonstring).build();
+	}
+	
+	@GET
+	@Path("/generic/getInvoiceForId")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response genericGetInvoiceForId(InputStream incomingData) {
+		String respuesta = "";
+		String jsonstring = "";
+		int result = 0;
+		int codigoRespuesta=0;
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+
+			System.out.println("Data Received: " + crunchifyBuilder.toString());
+			// try {
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(crunchifyBuilder.toString());
+			jsonstring = crunchifyBuilder.toString();
+			
+			codigoRespuesta=200;
+			
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			respuesta = e.getMessage();
+			e.printStackTrace();
+			return Response.status(402).entity("Catch "+e.getMessage()).build();
+		}
+
+		// return HTTP response 200 in case of success
+		return Response.status(codigoRespuesta).entity(jsonstring).build();
+	}
+	
+	@GET
+	@Path("/generic/rePrintInvoice")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response genericRePrintInvoice(InputStream incomingData) {
+		String respuesta = "";
+		String jsonstring = "";
+		int result = 0;
+		int codigoRespuesta=0;
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+
+			System.out.println("Data Received: " + crunchifyBuilder.toString());
+			// try {
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(crunchifyBuilder.toString());
+			jsonstring = crunchifyBuilder.toString();
+			
+			codigoRespuesta=200;
+			
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			respuesta = e.getMessage();
+			e.printStackTrace();
+			return Response.status(402).entity("Catch "+e.getMessage()).build();
+		}
+
+		// return HTTP response 200 in case of success
+		return Response.status(codigoRespuesta).entity(jsonstring).build();
 	}
 
 	private static String updateIdReserva(int idllamado, String idReserva, String idHotel) {
